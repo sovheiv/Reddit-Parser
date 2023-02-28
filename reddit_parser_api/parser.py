@@ -8,6 +8,9 @@ from selenium.common.exceptions import TimeoutException
 from selenium import webdriver
 
 from PiiQMedia.settings import PARSER
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class RedditParser:
@@ -53,9 +56,21 @@ class RedditParser:
         return {
             "url": url,
             "content": {"title": title, "text": text},
-            "likes_num": likes_num,
-            "comments_num": comments_num,
+            "likes_num": self.format_num(likes_num),
+            "comments_num": self.format_num(comments_num),
         }
+
+    @staticmethod
+    def format_num(num: str):
+        if num.isdigit():
+            return int(num)
+        if num.endswith("k") or num.endswith("K"):
+            return int(float(num[:-1]) * 1000)
+        if num.endswith("m") or num.endswith("M"):
+            return int(float(num[:-1]) * 1000000)
+
+        logger.error(f"Wrong number: {num}")
+        return False
 
     def wait_post_load(self):
         try:

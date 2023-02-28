@@ -1,12 +1,16 @@
-from pathlib import Path
 import os
+from pathlib import Path
+
+from environs import Env
+from datetime import timedelta 
+env = Env()
+env.read_env(override=True)
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-d)00y_x3j8_8e!uo3)&ipui-nl24jcdxh%=9&w2$dq!9w&f9^b"
-
+SECRET_KEY = env.str("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
@@ -29,7 +33,6 @@ MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
-    # "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
@@ -59,23 +62,18 @@ WSGI_APPLICATION = "PiiQMedia.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+with env.prefixed("DB_"):
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql_psycopg2",
+            "NAME": env.str("NAME"),
+            "USER": env.str("USER"),
+            "PASSWORD": env.str("PASSWORD"),
+            "HOST": env.str("HOST"),
+            "PORT": env.int("PORT"),
+        }
     }
-}
 
-CACHES = {
-    "default": {
-        "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://127.0.0.1:6379/1",
-        "TIMEOUT": 600,
-        "OPTIONS": {
-            "CLIENT_CLASS": "django_redis.client.DefaultClient",
-        },
-    }
-}
 
 # Password validation
 # https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators
@@ -105,7 +103,7 @@ TIME_ZONE = "UTC"
 
 USE_I18N = True
 
-USE_TZ = True
+USE_TZ = False
 
 
 # Static files (CSS, JavaScript, Images)
@@ -157,11 +155,16 @@ TEMPLATES = [
     },
 ]
 
-PARSER = {
-    "DRIVER_PATH": "selenium\chromedriver.exe",
-    "POST_END_CLASS": "_2ulKn_zs7Y3LWsOqoFLHPo",
-    "CONTENT_PART_CLASS": "_1qeIAgB0cPwnLhDF9XSiJM",
-    "COMMENTS_CLASS": "FHCV02u6Cp2zYL0fhQPsO",
-    "LIKES_ID_START": "vote-arrows",
-    "TITLE_CLASS": "_eYtD2XCVieq6emjKBH3m",
-}
+
+parser_conf_keys = [
+    "DRIVER_PATH",
+    "POST_END_CLASS",
+    "CONTENT_PART_CLASS",
+    "COMMENTS_CLASS",
+    "LIKES_ID_START",
+    "TITLE_CLASS",
+]
+with env.prefixed("PARSER_"):
+    PARSER = {key: env.str(key) for key in parser_conf_keys}
+
+POST_LIFETIME = timedelta(minutes=env.int("POST_LIFETIME"))
