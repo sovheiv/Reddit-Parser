@@ -23,6 +23,8 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "reddit_parser_api.apps.RedditParserApiConfig",
+    "reddit_parser.apps.RedditParserConfig",
+
 ]
 
 MIDDLEWARE = [
@@ -36,7 +38,7 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = "PiiQMedia.urls"
-
+  
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
